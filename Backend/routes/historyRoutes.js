@@ -54,4 +54,11 @@ router.get(
     historyController.getAllHistory
 );
 
+router.delete(
+    "/history/:id",
+    verifyToken,
+    isAdmin,
+    historyController.deleteHistory
+);
+
 module.exports = router;
