@@ -1,6 +1,6 @@
 const { Comment, User, Book } = require("../models");
 const asyncHandler = require("express-async-handler");
-
+const { logHistory } = require('../utils/historyLogger');
 // POST new comment
 exports.createComment = asyncHandler(async (req, res) => {
     const userId = req.userId; // получен из verifyToken
@@ -45,6 +45,8 @@ exports.createComment = asyncHandler(async (req, res) => {
             }
         ]
     });
+
+    await logHistory(`Пользователь "${req.user.username}" оставил комментарий к книге "${book.book_title}"`);
 
     res.status(201).json({
         success: true,
@@ -133,6 +135,8 @@ exports.updateComment = asyncHandler(async (req, res) => {
         include: [{ model: User, attributes: ["id", "username"] }],
     });
 
+    await logHistory(`Пользователь "${req.user.username}" отредактировал комментарий (id: ${comment.id})`);
+
     res.status(200).json({
         success: true,
         data: updatedComment,
@@ -150,6 +154,8 @@ exports.deleteComment = asyncHandler(async (req, res) => {
             .status(404)
             .json({ success: false, message: "Комментарий не найден." });
     }
+
+    await logHistory(`Пользователь "${req.user.username}" удалил комментарий (id: ${comment.id})`);
 
     await comment.destroy();
 

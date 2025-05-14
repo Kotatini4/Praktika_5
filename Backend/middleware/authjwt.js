@@ -8,12 +8,19 @@ const verifyToken = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.SECRET_ACCESS_TOKEN);
-        req.userId = decoded.userId;
+
+        const user = await User.findByPk(decoded.userId, { include: "role" });
+        if (!user) return res.status(404).send({ message: "Пользователь не найден" });
+
+        req.user = user; // ✅ вот это добавь
+        req.userId = user.id; // (можешь оставить, если где-то используется)
+
         next();
     } catch {
         return res.status(401).send({ message: "Невалидный токен" });
     }
 };
+
 
 const isAdmin = async (req, res, next) => {
     const user = await User.findByPk(req.userId, { include: "role" });

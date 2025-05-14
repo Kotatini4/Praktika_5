@@ -1,5 +1,7 @@
+const { Op } = require('sequelize');
 const db = require("../config/database");
 const { Book, Author, Category, Comment, User } = require("../models");
+const { logHistory } = require('../utils/historyLogger');
 
 exports.createBook = async (req, res) => {
     try {
@@ -60,6 +62,8 @@ exports.createBook = async (req, res) => {
             ],
         });
 
+        await logHistory(`Админ "${req.user.username}" создал книгу "${book.title}"`);
+
         res.status(201).json({
             success: true,
             data: createdBook,
@@ -79,20 +83,47 @@ exports.createBook = async (req, res) => {
 
 exports.getAllBooks = async (req, res) => {
     try {
+        const { title, category_id, author_ids } = req.query;
+
+        const whereClause = {};
+        const include = [
+            {
+                model: Author,
+                as: "authors",
+                through: { attributes: [] },
+                attributes: ["authorId", "firstName", "lastName"],
+                where: undefined, // динамически добавим фильтр по автору
+            },
+            {
+                model: Category,
+                as: "category",
+                attributes: ["categoryId", "name"],
+            },
+        ];
+
+        // === Фильтр по названию книги ===
+        if (title) {
+            whereClause.book_title = { [Op.iLike]: `%${title}%` };
+        }
+
+        // === Фильтр по category_id ===
+        if (category_id) {
+            whereClause.category_id = category_id;
+        }
+
+        // === Фильтр по author_ids (список id через запятую) ===
+        if (author_ids) {
+            const idsArray = author_ids.split(',').map(Number).filter(Boolean);
+            if (idsArray.length > 0) {
+                include[0].where = {
+                    authorId: { [Op.in]: idsArray },
+                };
+            }
+        }
+
         const books = await Book.findAll({
-            include: [
-                {
-                    model: Author,
-                    as: "authors", // Указываем алиас, который используется в ассоциации
-                    through: { attributes: [] },
-                    attributes: ["authorId", "firstName", "lastName"], // Явно указываем нужные поля
-                },
-                {
-                    model: Category,
-                    as: "category", // Указываем алиас, который используется в ассоциации
-                    attributes: ["categoryId", "name"], // Явно указываем нужные поля
-                },
-            ],
+            where: whereClause,
+            include,
             order: [["book_id", "ASC"]],
         });
 
@@ -112,6 +143,7 @@ exports.getAllBooks = async (req, res) => {
         });
     }
 };
+
 
 exports.getBookById = async (req, res) => {
     try {
@@ -227,6 +259,8 @@ exports.updateBook = async (req, res) => {
             ],
         });
 
+        await logHistory(`Админ "${req.user.username}" отредактировал книгу "${book.title}"`);
+
         res.status(200).json({
             success: true,
             message: "Книга успешно обновлена",
@@ -260,6 +294,8 @@ exports.deleteBook = async (req, res) => {
 
         // Удаляем книгу
         await book.destroy();
+
+        await logHistory(`Админ "${req.user.username}" удалил книгу "${book.title}"`);
 
         res.status(200).json({
             success: true,

@@ -36,11 +36,16 @@ export default function Navbar() {
                             Авторы
                         </Button>
                     </Stack>
-                    <Stack direction="row" spacing={2}>
+                    <Stack direction="row" spacing={2} alignItems="center">
                         {user ? (
-                            <Button color="inherit" onClick={handleLogout}>
-                                Выйти
-                            </Button>
+                            <>
+                                <Typography variant="body1">
+                                    {user.username}
+                                </Typography>
+                                <Button color="inherit" onClick={handleLogout}>
+                                    Выйти
+                                </Button>
+                            </>
                         ) : (
                             <Button color="inherit" component={Link} to="/login">
                                 Вход

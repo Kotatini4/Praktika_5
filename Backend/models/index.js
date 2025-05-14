@@ -4,6 +4,7 @@ const Category = require("./category");
 const Comment = require("./comment");
 const User = require("./user");
 const Role = require("./role");
+const History = require("./history"); // ✅ добавлено History
 
 Book.belongsToMany(Author, {
     through: "book_author",
@@ -45,6 +46,7 @@ const models = {
     Comment: Comment,
     User: User,
     Role: Role,
+    History: History, // ✅ добавлено сюда тоже
 };
 
 module.exports = models;

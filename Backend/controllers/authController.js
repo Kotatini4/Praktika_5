@@ -27,7 +27,7 @@ exports.signup = async (req, res) => {
     }
 };
 
-// Вход пользователя
+// Вход пользователя через имя
 exports.signin = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
