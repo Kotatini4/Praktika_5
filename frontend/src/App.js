@@ -1,15 +1,21 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import RegisterPage from './pages/RegisterPage';
-import LoginPage from './pages/LoginPage';
-import BookListPage from './pages/BookListPage';
-import BookDetailPage from './pages/BookDetailPage';
-import NewBookPage from './pages/NewBookPage';
-import EditBookPage from './pages/EditBookPage';
-import AuthorListPage from './pages/AuthorListPage';
-import Navbar from './components/Navbar';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import AuthorDetailPage from './pages/AuthorDetailPage';
+import React from "react";
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Navigate,
+} from "react-router-dom";
+import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
+import BookListPage from "./pages/BookListPage";
+import BookDetailPage from "./pages/BookDetailPage";
+import NewBookPage from "./pages/NewBookPage";
+import EditBookPage from "./pages/EditBookPage";
+import AuthorListPage from "./pages/AuthorListPage";
+import Navbar from "./components/Navbar";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import AuthorDetailPage from "./pages/AuthorDetailPage";
+import HomePage from "./pages/HomePage";
 
 function PrivateRoute({ children, roles }) {
     const { user } = useAuth();
@@ -26,8 +32,10 @@ export default function App() {
                 <Routes>
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="/" element={<BookListPage />} />
+                    {/*<Route path="/" element={<BookListPage />} />*/}
+                    <Route path="/" element={<HomePage />} />
                     <Route path="/books/:id" element={<BookDetailPage />} />
+                    <Route path="/books" element={<BookListPage />} />
                     <Route
                         path="/books/new"
                         element={
@@ -61,7 +69,6 @@ export default function App() {
                         }
                     />
                 </Routes>
-
             </Router>
         </AuthProvider>
     );

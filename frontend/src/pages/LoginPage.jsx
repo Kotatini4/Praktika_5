@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
     Container,
     TextField,
@@ -9,23 +9,23 @@ import {
     Box,
     Paper,
     Alert,
-    Stack
-} from '@mui/material';
+    Stack,
+} from "@mui/material";
 
 export default function LoginPage() {
     const { login } = useAuth();
     const navigate = useNavigate();
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             await login(username, password);
-            navigate('/');
+            navigate("/books");
         } catch (err) {
-            setError('Неверные имя пользователя или пароль');
+            setError("Неверные имя пользователя или пароль");
         }
     };
 
@@ -35,7 +35,11 @@ export default function LoginPage() {
                 <Typography variant="h5" gutterBottom align="center">
                     Вход в систему
                 </Typography>
-                {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+                {error && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {error}
+                    </Alert>
+                )}
                 <Box component="form" onSubmit={handleSubmit}>
                     <Stack spacing={2}>
                         <TextField

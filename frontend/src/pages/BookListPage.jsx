@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
 import {
     Container,
     TextField,
@@ -11,13 +11,13 @@ import {
     ListItem,
     ListItemText,
     ListItemSecondaryAction,
-    MenuItem
-} from '@mui/material';
+    MenuItem,
+} from "@mui/material";
 
 export default function BookListPage() {
     const [books, setBooks] = useState([]);
-    const [search, setSearch] = useState('');
-    const [categoryId, setCategoryId] = useState('');
+    const [search, setSearch] = useState("");
+    const [categoryId, setCategoryId] = useState("");
     const [authorIds, setAuthorIds] = useState([]);
     const [categories, setCategories] = useState([]);
     const [authors, setAuthors] = useState([]);
@@ -30,28 +30,32 @@ export default function BookListPage() {
     }, []);
 
     const fetchBooks = async () => {
-        const res = await axios.get('http://localhost:3000/books');
+        const res = await axios.get("http://localhost:3000/books");
+        console.log("Ответ от сервера:", res.data);
         setBooks(res.data.data);
     };
 
     const fetchCategories = async () => {
-        const res = await axios.get('http://localhost:3000/categories');
+        const res = await axios.get("http://localhost:3000/categories");
         setCategories(res.data.data || []);
     };
 
     const fetchAuthors = async () => {
-        const res = await axios.get('http://localhost:3000/authors');
+        const res = await axios.get("http://localhost:3000/authors");
         setAuthors(res.data || []);
     };
 
     const handleSearch = async () => {
         const params = new URLSearchParams();
 
-        if (search) params.append('title', search);
-        if (categoryId) params.append('category_id', categoryId);
-        if (authorIds.length > 0) params.append('author_ids', authorIds.join(','));
+        if (search) params.append("title", search);
+        if (categoryId) params.append("category_id", categoryId);
+        if (authorIds.length > 0)
+            params.append("author_ids", authorIds.join(","));
 
-        const res = await axios.get(`http://localhost:3000/books?${params.toString()}`);
+        const res = await axios.get(
+            `http://localhost:3000/books?${params.toString()}`
+        );
 
         if (res.data.data.length > 0) {
             setBooks(res.data.data);
@@ -98,8 +102,8 @@ export default function BookListPage() {
                     value={authorIds}
                     onChange={(e) =>
                         setAuthorIds(
-                            typeof e.target.value === 'string'
-                                ? e.target.value.split(',')
+                            typeof e.target.value === "string"
+                                ? e.target.value.split(",")
                                 : e.target.value
                         )
                     }
@@ -115,7 +119,6 @@ export default function BookListPage() {
                         </MenuItem>
                     ))}
                 </TextField>
-
 
                 <Button variant="contained" onClick={handleSearch}>
                     Поиск
@@ -133,10 +136,19 @@ export default function BookListPage() {
                                 secondary={
                                     <>
                                         {book.authors && book.authors.length > 0
-                                            ? book.authors.map((a) => `${a.firstName} ${a.lastName}`).join(', ')
-                                            : 'Автор не указан'}
+                                            ? book.authors
+                                                  .map(
+                                                      (a) =>
+                                                          `${a.firstName} ${a.lastName}`
+                                                  )
+                                                  .join(", ")
+                                            : "Автор не указан"}
                                         {book.category && (
-                                            <> | Категория: {book.category.name}</>
+                                            <>
+                                                {" "}
+                                                | Категория:{" "}
+                                                {book.category.name}
+                                            </>
                                         )}
                                     </>
                                 }
@@ -153,8 +165,6 @@ export default function BookListPage() {
                         </ListItem>
                     ))}
                 </List>
-
-
             )}
         </Container>
     );

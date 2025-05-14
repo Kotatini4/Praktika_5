@@ -1,14 +1,14 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
     AppBar,
     Toolbar,
     Typography,
     Button,
     Stack,
-    Container
-} from '@mui/material';
+    Container,
+} from "@mui/material";
 
 export default function Navbar() {
     const { user, logout } = useAuth();
@@ -16,40 +16,89 @@ export default function Navbar() {
 
     const handleLogout = () => {
         logout();
-        navigate('/login');
+        navigate("/login");
     };
 
     return (
         <AppBar position="static">
             <Container>
-                <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
+                <Toolbar
+                    disableGutters
+                    sx={{ justifyContent: "space-between" }}
+                >
                     <Stack direction="row" spacing={2} alignItems="center">
-                        <Typography variant="h6" component={Link} to="/" sx={{ textDecoration: 'none', color: 'inherit' }}>
-                            Книги
+                        {/* Кнопка "Домой" всегда */}
+                        <Typography
+                            variant="h6"
+                            component={Link}
+                            to="/"
+                            sx={{ textDecoration: "none", color: "inherit" }}
+                        >
+                            Домой
                         </Typography>
-                        {user?.role?.name === 'admin' && (
-                            <Button color="inherit" component={Link} to="/books/new">
-                                Добавить книгу
-                            </Button>
-                        )}
-                        <Button color="inherit" component={Link} to="/authors">
-                            Авторы
+                        <Button
+                            variant="outlined"
+                            color="inherit"
+                            component={Link}
+                            to="/books"
+                            sx={{ borderRadius: 2, fontWeight: 500 }}
+                        >
+                            Смотреть книги
                         </Button>
+
+                        {/* Только для админа */}
+                        {user?.role?.name === "admin" && (
+                            <>
+                                <Button
+                                    variant="outlined"
+                                    color="inherit"
+                                    component={Link}
+                                    to="/books/new"
+                                >
+                                    Книги
+                                </Button>
+
+                                <Button
+                                    variant="outlined"
+                                    color="inherit"
+                                    component={Link}
+                                    to="/authors"
+                                >
+                                    Авторы
+                                </Button>
+                            </>
+                        )}
                     </Stack>
                     <Stack direction="row" spacing={2} alignItems="center">
                         {user ? (
                             <>
-                                <Typography variant="body1">
-                                    {user.username}
-                                </Typography>
-                                <Button color="inherit" onClick={handleLogout}>
+                                <Button
+                                    variant="outlined"
+                                    color="inherit"
+                                    onClick={handleLogout}
+                                >
                                     Выйти
                                 </Button>
                             </>
                         ) : (
-                            <Button color="inherit" component={Link} to="/login">
-                                Вход
-                            </Button>
+                            <>
+                                <Button
+                                    variant="outlined"
+                                    color="inherit"
+                                    component={Link}
+                                    to="/login"
+                                >
+                                    Вход
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    color="inherit"
+                                    component={Link}
+                                    to="/register"
+                                >
+                                    Регистрация
+                                </Button>
+                            </>
                         )}
                     </Stack>
                 </Toolbar>
