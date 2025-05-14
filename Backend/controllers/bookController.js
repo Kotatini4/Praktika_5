@@ -1,7 +1,7 @@
-const { Op } = require('sequelize');
+const { Op } = require("sequelize");
 const db = require("../config/database");
 const { Book, Author, Category, Comment, User } = require("../models");
-const { logHistory } = require('../utils/historyLogger');
+const { logHistory } = require("../utils/historyLogger");
 
 exports.createBook = async (req, res) => {
     try {
@@ -62,7 +62,9 @@ exports.createBook = async (req, res) => {
             ],
         });
 
-        await logHistory(`Админ "${req.user.username}" создал книгу "${book.title}"`);
+        await logHistory(
+            `Админ "${req.user.username}" создал книгу "${book.title}"`
+        );
 
         res.status(201).json({
             success: true,
@@ -83,7 +85,7 @@ exports.createBook = async (req, res) => {
 
 exports.getAllBooks = async (req, res) => {
     try {
-        const { title, category_id, author_ids } = req.query;
+        const { title, category_id, author_ids, limit, offset } = req.query;
 
         const whereClause = {};
         const include = [
@@ -92,7 +94,7 @@ exports.getAllBooks = async (req, res) => {
                 as: "authors",
                 through: { attributes: [] },
                 attributes: ["authorId", "firstName", "lastName"],
-                where: undefined, // динамически добавим фильтр по автору
+                where: undefined,
             },
             {
                 model: Category,
@@ -101,19 +103,16 @@ exports.getAllBooks = async (req, res) => {
             },
         ];
 
-        // === Фильтр по названию книги ===
         if (title) {
             whereClause.book_title = { [Op.iLike]: `%${title}%` };
         }
 
-        // === Фильтр по category_id ===
         if (category_id) {
             whereClause.category_id = category_id;
         }
 
-        // === Фильтр по author_ids (список id через запятую) ===
         if (author_ids) {
-            const idsArray = author_ids.split(',').map(Number).filter(Boolean);
+            const idsArray = author_ids.split(",").map(Number).filter(Boolean);
             if (idsArray.length > 0) {
                 include[0].where = {
                     authorId: { [Op.in]: idsArray },
@@ -121,15 +120,21 @@ exports.getAllBooks = async (req, res) => {
             }
         }
 
-        const books = await Book.findAll({
+        const limitVal = parseInt(limit) || 10;
+        const offsetVal = parseInt(offset) || 0;
+
+        const books = await Book.findAndCountAll({
             where: whereClause,
             include,
+            limit: limitVal,
+            offset: offsetVal,
             order: [["book_id", "ASC"]],
         });
 
         res.status(200).json({
             success: true,
-            data: books,
+            data: books.rows,
+            total: books.count,
         });
     } catch (error) {
         console.error("Ошибка при получении книг:", error);
@@ -143,7 +148,6 @@ exports.getAllBooks = async (req, res) => {
         });
     }
 };
-
 
 exports.getBookById = async (req, res) => {
     try {
@@ -191,11 +195,13 @@ exports.getBookById = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Ошибка при получении книги",
-            error: process.env.NODE_ENV === "development" ? error.message : undefined,
+            error:
+                process.env.NODE_ENV === "development"
+                    ? error.message
+                    : undefined,
         });
     }
 };
-
 
 exports.updateBook = async (req, res) => {
     try {
@@ -259,7 +265,9 @@ exports.updateBook = async (req, res) => {
             ],
         });
 
-        await logHistory(`Админ "${req.user.username}" отредактировал книгу "${book.title}"`);
+        await logHistory(
+            `Админ "${req.user.username}" отредактировал книгу "${book.title}"`
+        );
 
         res.status(200).json({
             success: true,
@@ -295,7 +303,9 @@ exports.deleteBook = async (req, res) => {
         // Удаляем книгу
         await book.destroy();
 
-        await logHistory(`Админ "${req.user.username}" удалил книгу "${book.title}"`);
+        await logHistory(
+            `Админ "${req.user.username}" удалил книгу "${book.title}"`
+        );
 
         res.status(200).json({
             success: true,
