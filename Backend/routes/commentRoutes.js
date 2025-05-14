@@ -90,7 +90,7 @@ router.put(
 router.delete(
     "/comments/:id",
     authJwt.verifyToken,
-    authJwt.isAdmin,
+    authJwt.isUserOrAdmin,
     /* #swagger.tags = ['Comments']
      #swagger.description = 'Удалить комментарий (только для админа)'
      #swagger.parameters['id'] = {

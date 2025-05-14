@@ -1,6 +1,7 @@
 const { Comment, User, Book } = require("../models");
 const asyncHandler = require("express-async-handler");
-const { logHistory } = require('../utils/historyLogger');
+const { logHistory } = require("../utils/historyLogger");
+
 // POST new comment
 exports.createComment = asyncHandler(async (req, res) => {
     const userId = req.userId; // получен из verifyToken
@@ -40,13 +41,15 @@ exports.createComment = asyncHandler(async (req, res) => {
         include: [
             {
                 model: User,
-                as: 'author',
-                attributes: ['id', 'username'],
-            }
-        ]
+                as: "author",
+                attributes: ["id", "username"],
+            },
+        ],
     });
 
-    await logHistory(`Пользователь "${req.user.username}" оставил комментарий к книге "${book.book_title}"`);
+    await logHistory(
+        `Пользователь "${req.user.username}" оставил комментарий к книге "${book.book_title}"`
+    );
 
     res.status(201).json({
         success: true,
@@ -54,8 +57,6 @@ exports.createComment = asyncHandler(async (req, res) => {
         message: "Комментарий успешно создан.",
     });
 });
-
-
 
 // GET all comments for a specific book
 exports.getAllCommentsForBook = asyncHandler(async (req, res) => {
@@ -106,25 +107,20 @@ exports.updateComment = asyncHandler(async (req, res) => {
     }
 
     if (!body) {
-        return res
-            .status(400)
-            .json({
-                success: false,
-                message:
-                    "Текст комментария не может быть пустым для обновления.",
-            });
+        return res.status(400).json({
+            success: false,
+            message: "Текст комментария не может быть пустым для обновления.",
+        });
     }
 
     const updatedData = { body };
     if (userId) {
         const userExists = await User.findByPk(userId);
         if (!userExists) {
-            return res
-                .status(404)
-                .json({
-                    success: false,
-                    message: "Пользователь с указанным ID не найден.",
-                });
+            return res.status(404).json({
+                success: false,
+                message: "Пользователь с указанным ID не найден.",
+            });
         }
         updatedData.user_id = userId;
     }
@@ -135,7 +131,9 @@ exports.updateComment = asyncHandler(async (req, res) => {
         include: [{ model: User, attributes: ["id", "username"] }],
     });
 
-    await logHistory(`Пользователь "${req.user.username}" отредактировал комментарий (id: ${comment.id})`);
+    await logHistory(
+        `Пользователь "${req.user.username}" отредактировал комментарий (id: ${comment.id})`
+    );
 
     res.status(200).json({
         success: true,
@@ -150,12 +148,26 @@ exports.deleteComment = asyncHandler(async (req, res) => {
     const comment = await Comment.findByPk(id);
 
     if (!comment) {
-        return res
-            .status(404)
-            .json({ success: false, message: "Комментарий не найден." });
+        return res.status(404).json({
+            success: false,
+            message: "Комментарий не найден.",
+        });
     }
 
-    await logHistory(`Пользователь "${req.user.username}" удалил комментарий (id: ${comment.id})`);
+    // 🔒 Проверка доступа: либо админ, либо владелец комментария
+    const isAdmin = req.user.role?.name === "admin";
+    const isOwner = comment.user_id === req.userId;
+
+    if (!isAdmin && !isOwner) {
+        return res.status(403).json({
+            success: false,
+            message: "Вы можете удалить только свои комментарии.",
+        });
+    }
+
+    await logHistory(
+        `Пользователь "${req.user.username}" удалил комментарий (id: ${comment.id})`
+    );
 
     await comment.destroy();
 

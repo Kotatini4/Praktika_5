@@ -7,6 +7,7 @@ const endpointsFiles = [
     "./routes/categoryRoutes.js",
     "./routes/commentRoutes.js",
     "./routes/authRoutes.js",
+    "./routes/historyRoutes.js",
 ];
 
 const doc = {
@@ -23,6 +24,10 @@ const doc = {
         { name: "Comments", description: "Комментарии к книгам" },
         { name: "Auth", description: "Управление авторизацией" },
         { name: "Users", description: "Управление пользователями" },
+        {
+            name: "History",
+            description: "Просмотр истории действий (только для админа)",
+        },
     ],
     securityDefinitions: {
         bearerAuth: {

@@ -11,12 +11,14 @@ const bookRoutes = require("./routes/bookRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const authRoutes = require("./routes/authRoutes");
+const historyRoutes = require("./routes/historyRoutes");
 
 app.use(cors());
 
 app.use(express.json());
 swagger(app);
 
+app.use("/", historyRoutes);
 app.use("/", authorRoutes);
 app.use("/", bookRoutes);
 app.use("/", categoryRoutes);

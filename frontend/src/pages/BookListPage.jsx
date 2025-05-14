@@ -9,9 +9,8 @@ import {
     Stack,
     List,
     ListItem,
-    ListItemText,
-    ListItemSecondaryAction,
     MenuItem,
+    Box,
 } from "@mui/material";
 
 export default function BookListPage() {
@@ -130,38 +129,50 @@ export default function BookListPage() {
             ) : (
                 <List>
                     {books.map((book) => (
-                        <ListItem key={book.bookId} divider>
-                            <ListItemText
-                                primary={book.title}
-                                secondary={
-                                    <>
-                                        {book.authors && book.authors.length > 0
-                                            ? book.authors
-                                                  .map(
-                                                      (a) =>
-                                                          `${a.firstName} ${a.lastName}`
-                                                  )
-                                                  .join(", ")
-                                            : "Автор не указан"}
-                                        {book.category && (
-                                            <>
-                                                {" "}
-                                                | Категория:{" "}
-                                                {book.category.name}
-                                            </>
-                                        )}
-                                    </>
-                                }
-                            />
-                            <ListItemSecondaryAction>
-                                <Button
-                                    variant="outlined"
-                                    component={Link}
-                                    to={`/books/${book.bookId}`}
+                        <ListItem
+                            key={book.bookId}
+                            divider
+                            sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "flex-start",
+                                flexWrap: "wrap",
+                                gap: 1,
+                            }}
+                        >
+                            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                                <Typography
+                                    variant="subtitle1"
+                                    fontWeight={600}
+                                    sx={{ wordBreak: "break-word" }}
                                 >
-                                    Подробнее
-                                </Button>
-                            </ListItemSecondaryAction>
+                                    {book.title}
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
+                                    {book.authors
+                                        ?.map(
+                                            (a) =>
+                                                `${a.firstName} ${a.lastName}`
+                                        )
+                                        .join(", ") || "Автор не указан"}{" "}
+                                    | Категория: {book.category?.name || "—"}
+                                </Typography>
+                            </Box>
+
+                            <Button
+                                variant="outlined"
+                                component={Link}
+                                to={`/books/${book.bookId}`}
+                                sx={{
+                                    whiteSpace: "nowrap",
+                                    alignSelf: "center",
+                                }}
+                            >
+                                ПОДРОБНЕЕ
+                            </Button>
                         </ListItem>
                     ))}
                 </List>
