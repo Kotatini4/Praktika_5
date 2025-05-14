@@ -14,6 +14,7 @@ import {
     Box,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -24,6 +25,7 @@ export default function Navbar() {
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const [anchorEl, setAnchorEl] = useState(null);
+    const [anchorData, setAnchorData] = useState(null); // для "Добавить данные"
     const open = Boolean(anchorEl);
 
     const handleLogout = () => {
@@ -45,25 +47,6 @@ export default function Navbar() {
             onClick={handleMenuClose}
         >
             Смотреть книги
-        </MenuItem>,
-    ];
-
-    const adminLinks = [
-        <MenuItem
-            key="add-book"
-            component={Link}
-            to="/books/new"
-            onClick={handleMenuClose}
-        >
-            Книги
-        </MenuItem>,
-        <MenuItem
-            key="authors"
-            component={Link}
-            to="/authors"
-            onClick={handleMenuClose}
-        >
-            Авторы
         </MenuItem>,
     ];
 
@@ -127,7 +110,35 @@ export default function Navbar() {
                                 }}
                             >
                                 {commonLinks}
-                                {user?.role?.name === "admin" && adminLinks}
+                                {user?.role?.name === "admin" && (
+                                    <>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/books/new"
+                                        >
+                                            Книги
+                                        </MenuItem>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/authors"
+                                        >
+                                            Авторы
+                                        </MenuItem>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/categories/manage"
+                                        >
+                                            Жанры
+                                        </MenuItem>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/history"
+                                            onClick={() => setAnchorData(null)}
+                                        >
+                                            История изменений
+                                        </MenuItem>
+                                    </>
+                                )}
                                 {authLinks}
                             </Menu>
                         </>
@@ -154,22 +165,68 @@ export default function Navbar() {
                                     >
                                         Смотреть книги
                                     </Button>
+
                                     {user?.role?.name === "admin" && (
                                         <>
                                             <Button
                                                 color="inherit"
-                                                component={Link}
-                                                to="/books/new"
+                                                onClick={(e) =>
+                                                    setAnchorData(
+                                                        e.currentTarget
+                                                    )
+                                                }
+                                                endIcon={<ArrowDropDownIcon />}
                                             >
-                                                Книги
+                                                Добавить данные
                                             </Button>
-                                            <Button
-                                                color="inherit"
-                                                component={Link}
-                                                to="/authors"
+                                            <Menu
+                                                anchorEl={anchorData}
+                                                open={Boolean(anchorData)}
+                                                onClose={() =>
+                                                    setAnchorData(null)
+                                                }
+                                                anchorOrigin={{
+                                                    vertical: "bottom",
+                                                    horizontal: "left",
+                                                }}
                                             >
-                                                Авторы
-                                            </Button>
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/books/new"
+                                                    onClick={() =>
+                                                        setAnchorData(null)
+                                                    }
+                                                >
+                                                    Книги
+                                                </MenuItem>
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/authors"
+                                                    onClick={() =>
+                                                        setAnchorData(null)
+                                                    }
+                                                >
+                                                    Авторы
+                                                </MenuItem>
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/categories/manage"
+                                                    onClick={() =>
+                                                        setAnchorData(null)
+                                                    }
+                                                >
+                                                    Жанры
+                                                </MenuItem>
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/history"
+                                                    onClick={() =>
+                                                        setAnchorData(null)
+                                                    }
+                                                >
+                                                    История изменений
+                                                </MenuItem>
+                                            </Menu>
                                         </>
                                     )}
                                 </Stack>

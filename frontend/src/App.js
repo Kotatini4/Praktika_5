@@ -16,6 +16,8 @@ import Navbar from "./components/Navbar";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import AuthorDetailPage from "./pages/AuthorDetailPage";
 import HomePage from "./pages/HomePage";
+import CategoryPage from "./pages/CategoryPage";
+import HistoryPage from "./pages/HistoryPage";
 
 function PrivateRoute({ children, roles }) {
     const { user } = useAuth();
@@ -49,6 +51,22 @@ export default function App() {
                         element={
                             <PrivateRoute roles={["admin"]}>
                                 <EditBookPage />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/history"
+                        element={
+                            <PrivateRoute roles={["admin"]}>
+                                <HistoryPage />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/categories/manage"
+                        element={
+                            <PrivateRoute roles={["admin"]}>
+                                <CategoryPage />
                             </PrivateRoute>
                         }
                     />

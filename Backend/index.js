@@ -1,11 +1,16 @@
 require("dotenv").config();
 const express = require("express");
-const cors = require("cors"); // ← добавь это
+const cors = require("cors");
 const app = express();
-const db = require("./config/database");
-const swagger = require("./swagger");
 
-// Подключение маршрутов
+// Подключение к базе данных
+const db = require("./config/database");
+
+// Swagger
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger.json");
+
+// Импорт маршрутов
 const authorRoutes = require("./routes/authorRoutes");
 const bookRoutes = require("./routes/bookRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
@@ -13,11 +18,14 @@ const commentRoutes = require("./routes/commentRoutes");
 const authRoutes = require("./routes/authRoutes");
 const historyRoutes = require("./routes/historyRoutes");
 
-app.use(cors());
+// Middleware
+app.use(cors()); // Разрешает CORS-запросы
+app.use(express.json()); // Распознаёт JSON в теле запроса
 
-app.use(express.json());
-swagger(app);
+// Swagger UI доступен по адресу http://localhost:3000/api-docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+// Роуты
 app.use("/", historyRoutes);
 app.use("/", authorRoutes);
 app.use("/", bookRoutes);
@@ -25,10 +33,14 @@ app.use("/", categoryRoutes);
 app.use("/", commentRoutes);
 app.use("/", authRoutes);
 
-// Проверка подключения к БД
+// Проверка подключения к базе данных
 db.authenticate()
-    .then(() => console.log("Database connected..."))
-    .catch((err) => console.log("Error: " + err));
+    .then(() => console.log("✅ Database connected..."))
+    .catch((err) => console.log("❌ DB Error: " + err));
 
-const PORT = process.env.PORT || 3000; // Убедитесь, что порт совпадает (3000)
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+// Запуск сервера
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Server started at http://localhost:${PORT}`);
+    console.log(`📚 Swagger UI available at http://localhost:${PORT}/api-docs`);
+});
