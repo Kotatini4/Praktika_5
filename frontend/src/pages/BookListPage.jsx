@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import {
@@ -31,11 +31,17 @@ export default function BookListPage() {
         fetchAuthors();
     }, []);
 
-    useEffect(() => {
-        fetchBooks();
-    }, [page]);
+    const fetchCategories = async () => {
+        const res = await axios.get("http://localhost:3000/categories");
+        setCategories(res.data.data || []);
+    };
 
-    const fetchBooks = async () => {
+    const fetchAuthors = async () => {
+        const res = await axios.get("http://localhost:3000/authors");
+        setAuthors(res.data || []);
+    };
+
+    const fetchBooks = useCallback(async () => {
         const offset = (page - 1) * ITEMS_PER_PAGE;
         const params = new URLSearchParams();
 
@@ -51,29 +57,17 @@ export default function BookListPage() {
         );
         const data = res.data;
 
-        if (data.data.length > 0) {
-            setBooks(data.data);
-            setTotal(data.total);
-            setNotFound(false);
-        } else {
-            setBooks([]);
-            setTotal(0);
-            setNotFound(true);
-        }
-    };
+        setBooks(data.data);
+        setTotal(data.total);
+        setNotFound(data.data.length === 0);
+    }, [page, search, categoryId, authorIds]);
 
-    const fetchCategories = async () => {
-        const res = await axios.get("http://localhost:3000/categories");
-        setCategories(res.data.data || []);
-    };
-
-    const fetchAuthors = async () => {
-        const res = await axios.get("http://localhost:3000/authors");
-        setAuthors(res.data || []);
-    };
+    useEffect(() => {
+        fetchBooks();
+    }, [fetchBooks]);
 
     const handleSearch = () => {
-        setPage(1); // сбрасываем на первую страницу при новом поиске
+        setPage(1); // сброс при новом поиске
         fetchBooks();
     };
 

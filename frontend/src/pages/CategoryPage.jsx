@@ -8,6 +8,7 @@ import {
     ListItem,
     ListItemText,
     Stack,
+    Pagination,
 } from "@mui/material";
 import axios from "axios";
 
@@ -15,6 +16,8 @@ export default function CategoryPage() {
     const [categories, setCategories] = useState([]);
     const [name, setName] = useState("");
     const [error, setError] = useState("");
+    const [page, setPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     useEffect(() => {
         fetchCategories();
@@ -55,6 +58,13 @@ export default function CategoryPage() {
         }
     };
 
+    // Пагинация
+    const totalPages = Math.ceil(categories.length / ITEMS_PER_PAGE);
+    const visibleCategories = categories.slice(
+        (page - 1) * ITEMS_PER_PAGE,
+        page * ITEMS_PER_PAGE
+    );
+
     return (
         <Container sx={{ mt: 4 }}>
             <Typography variant="h4" gutterBottom>
@@ -75,12 +85,19 @@ export default function CategoryPage() {
             </Stack>
 
             <List>
-                {categories.map((cat) => (
+                {visibleCategories.map((cat) => (
                     <ListItem key={cat.categoryId} divider>
                         <ListItemText primary={cat.name} />
                     </ListItem>
                 ))}
             </List>
+
+            <Pagination
+                count={totalPages}
+                page={page}
+                onChange={(e, val) => setPage(val)}
+                sx={{ mt: 2 }}
+            />
         </Container>
     );
 }

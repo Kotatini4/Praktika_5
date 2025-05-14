@@ -197,7 +197,7 @@ export default function Navbar() {
                                                         setAnchorData(null)
                                                     }
                                                 >
-                                                    Книги
+                                                    Добавить книгу
                                                 </MenuItem>
                                                 <MenuItem
                                                     component={Link}
@@ -206,7 +206,7 @@ export default function Navbar() {
                                                         setAnchorData(null)
                                                     }
                                                 >
-                                                    Авторы
+                                                    Добавить автора
                                                 </MenuItem>
                                                 <MenuItem
                                                     component={Link}
@@ -215,7 +215,7 @@ export default function Navbar() {
                                                         setAnchorData(null)
                                                     }
                                                 >
-                                                    Жанры
+                                                    Добавить жанр
                                                 </MenuItem>
                                                 <MenuItem
                                                     component={Link}
