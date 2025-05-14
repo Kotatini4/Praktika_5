@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
     Container,
     Typography,
@@ -14,17 +14,18 @@ import {
     Checkbox,
     ListItemText,
     Box,
-    Paper
-} from '@mui/material';
+    Paper,
+} from "@mui/material";
 
 export default function NewBookPage() {
-    const [title, setTitle] = useState('');
-    const [year, setYear] = useState('');
-    const [categoryId, setCategoryId] = useState('');
+    const [title, setTitle] = useState("");
+    const [year, setYear] = useState("");
+    const [categoryId, setCategoryId] = useState("");
     const [authorIds, setAuthorIds] = useState([]);
     const [categories, setCategories] = useState([]);
     const [authors, setAuthors] = useState([]);
-    const [notification, setNotification] = useState('');
+    const [notification, setNotification] = useState("");
+    const [categoryError, setCategoryError] = useState(false);
 
     useEffect(() => {
         fetchCategories();
@@ -32,36 +33,50 @@ export default function NewBookPage() {
     }, []);
 
     const fetchCategories = async () => {
-        const res = await axios.get('http://localhost:3000/categories');
+        const res = await axios.get("http://localhost:3000/categories");
         setCategories(res.data.data || []);
     };
 
     const fetchAuthors = async () => {
-        const res = await axios.get('http://localhost:3000/authors');
+        const res = await axios.get("http://localhost:3000/authors");
         setAuthors(res.data || []);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem('token');
-        await axios.post(
-            'http://localhost:3000/books',
-            {
-                book_title: title,
-                publication_year: year,
-                category_id: categoryId,
-                author_ids: authorIds,
-            },
-            {
-                headers: { Authorization: `Bearer ${token}` },
-            }
-        );
-        setTitle('');
-        setYear('');
-        setCategoryId('');
-        setAuthorIds([]);
-        setNotification('Книга успешно добавлена!');
-        setTimeout(() => setNotification(''), 3000);
+
+        if (!categoryId) {
+            setCategoryError(true);
+            return;
+        } else {
+            setCategoryError(false);
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+            await axios.post(
+                "http://localhost:3000/books",
+                {
+                    book_title: title,
+                    publication_year: year,
+                    category_id: categoryId,
+                    author_ids: authorIds,
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            setTitle("");
+            setYear("");
+            setCategoryId("");
+            setAuthorIds([]);
+            setNotification("Книга успешно добавлена!");
+            setTimeout(() => setNotification(""), 3000);
+        } catch (error) {
+            console.error("Ошибка при добавлении книги:", error);
+            setNotification("Ошибка при добавлении книги.");
+            setTimeout(() => setNotification(""), 3000);
+        }
     };
 
     return (
@@ -82,13 +97,16 @@ export default function NewBookPage() {
                         <TextField
                             label="Год публикации"
                             type="number"
-                            inputProps={{ min: 0, max: new Date().getFullYear() }}
+                            inputProps={{
+                                min: 0,
+                                max: new Date().getFullYear(),
+                            }}
                             value={year}
                             onChange={(e) => setYear(e.target.value)}
                             fullWidth
                             required
                         />
-                        <FormControl fullWidth>
+                        <FormControl fullWidth error={categoryError}>
                             <InputLabel id="category-label">Жанр</InputLabel>
                             <Select
                                 labelId="category-label"
@@ -96,12 +114,23 @@ export default function NewBookPage() {
                                 label="Жанр"
                                 onChange={(e) => setCategoryId(e.target.value)}
                             >
+                                <MenuItem value="">
+                                    <em>Выберите жанр</em>
+                                </MenuItem>
                                 {categories.map((cat) => (
-                                    <MenuItem key={cat.categoryId} value={cat.categoryId}>
+                                    <MenuItem
+                                        key={cat.categoryId}
+                                        value={cat.categoryId}
+                                    >
                                         {cat.name}
                                     </MenuItem>
                                 ))}
                             </Select>
+                            {categoryError && (
+                                <Typography variant="caption" color="error">
+                                    Пожалуйста, выберите жанр
+                                </Typography>
+                            )}
                         </FormControl>
                         <FormControl fullWidth>
                             <InputLabel id="authors-label">Авторы</InputLabel>
@@ -113,15 +142,29 @@ export default function NewBookPage() {
                                 input={<OutlinedInput label="Авторы" />}
                                 renderValue={(selected) =>
                                     authors
-                                        .filter((a) => selected.includes(a.authorId))
-                                        .map((a) => `${a.firstName} ${a.lastName}`)
-                                        .join(', ')
+                                        .filter((a) =>
+                                            selected.includes(a.authorId)
+                                        )
+                                        .map(
+                                            (a) =>
+                                                `${a.firstName} ${a.lastName}`
+                                        )
+                                        .join(", ")
                                 }
                             >
                                 {authors.map((a) => (
-                                    <MenuItem key={a.authorId} value={a.authorId}>
-                                        <Checkbox checked={authorIds.includes(a.authorId)} />
-                                        <ListItemText primary={`${a.firstName} ${a.lastName}`} />
+                                    <MenuItem
+                                        key={a.authorId}
+                                        value={a.authorId}
+                                    >
+                                        <Checkbox
+                                            checked={authorIds.includes(
+                                                a.authorId
+                                            )}
+                                        />
+                                        <ListItemText
+                                            primary={`${a.firstName} ${a.lastName}`}
+                                        />
                                     </MenuItem>
                                 ))}
                             </Select>

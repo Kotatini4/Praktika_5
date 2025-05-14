@@ -1,63 +1,96 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
     Container,
     Typography,
     TextField,
     Button,
     Stack,
-    Box
-} from '@mui/material';
-import { useAuth } from '../context/AuthContext';
+    Box,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+} from "@mui/material";
 
 export default function EditBookPage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth();
 
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [year, setYear] = useState('');
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [year, setYear] = useState("");
+    const [categoryId, setCategoryId] = useState("");
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [titleError, setTitleError] = useState(false);
+    const [yearError, setYearError] = useState(false);
+    const [categoryError, setCategoryError] = useState(false);
 
     useEffect(() => {
         fetchBook();
+        fetchCategories();
     }, []);
 
     const fetchBook = async () => {
         try {
             const res = await axios.get(`http://localhost:3000/books/${id}`);
             const book = res.data.data;
-            setTitle(book.title || '');
-            setDescription(book.description || '');
-            setYear(book.publicationYear || '');
+            setTitle(book.title || "");
+            setDescription(book.description || "");
+            setYear(book.publicationYear || "");
+            setCategoryId(
+                book.category?.categoryId
+                    ? String(book.category.categoryId)
+                    : ""
+            );
             setLoading(false);
         } catch (err) {
-            console.error('Ошибка загрузки книги:', err);
+            console.error("Ошибка загрузки книги:", err);
             setLoading(false);
         }
     };
 
-    const handleUpdate = async () => {
+    const fetchCategories = async () => {
         try {
-            const token = localStorage.getItem('token');
+            const res = await axios.get("http://localhost:3000/categories");
+            setCategories(res.data.data || []);
+        } catch (err) {
+            console.error("Ошибка загрузки категорий:", err);
+        }
+    };
+
+    const handleUpdate = async () => {
+        const isTitleValid = title.trim() !== "";
+        const isYearValid = String(year).trim() !== "";
+        const isCategoryValid = categoryId !== "";
+
+        setTitleError(!isTitleValid);
+        setYearError(!isYearValid);
+        setCategoryError(!isCategoryValid);
+
+        if (!isTitleValid || !isYearValid || !isCategoryValid) return;
+
+        try {
+            const token = localStorage.getItem("token");
             await axios.put(
                 `http://localhost:3000/books/${id}`,
                 {
                     book_title: title,
                     book_description: description,
                     publication_year: year,
-                    category_id: 1,      // можно заменить выбором жанра
-                    author_ids: [1]      // можно заменить выбором авторов
+                    category_id: categoryId,
+                    author_ids: [1], // временно, пока не добавлен выбор авторов
                 },
                 {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { Authorization: `Bearer ${token}` },
                 }
             );
-            navigate(`/books/${id}`);
+            navigate("/books");
         } catch (err) {
-            console.error('Ошибка при обновлении книги:', err);
+            console.error("Ошибка при обновлении книги:", err);
         }
     };
 
@@ -75,6 +108,8 @@ export default function EditBookPage() {
                     variant="outlined"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
+                    error={titleError}
+                    helperText={titleError ? "Название обязательно" : ""}
                 />
                 <TextField
                     label="Описание"
@@ -90,7 +125,34 @@ export default function EditBookPage() {
                     type="number"
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
+                    error={yearError}
+                    helperText={yearError ? "Год обязателен" : ""}
                 />
+                <FormControl fullWidth error={categoryError}>
+                    <InputLabel id="category-label">Жанр</InputLabel>
+                    <Select
+                        labelId="category-label"
+                        value={categoryId}
+                        onChange={(e) => setCategoryId(e.target.value)}
+                    >
+                        <MenuItem value="">
+                            <em>Выберите жанр</em>
+                        </MenuItem>
+                        {categories.map((cat) => (
+                            <MenuItem
+                                key={cat.categoryId}
+                                value={String(cat.categoryId)}
+                            >
+                                {cat.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                    {categoryError && (
+                        <Typography variant="caption" color="error">
+                            Жанр обязателен
+                        </Typography>
+                    )}
+                </FormControl>
             </Stack>
 
             <Box display="flex" gap={2}>
