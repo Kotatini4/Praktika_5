@@ -11,10 +11,13 @@ import {
     ListItemText,
     ListItemSecondaryAction,
     IconButton,
+    Pagination,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+
+const ITEMS_PER_PAGE = 10;
 
 export default function AuthorListPage() {
     const [authors, setAuthors] = useState([]);
@@ -23,6 +26,7 @@ export default function AuthorListPage() {
     const [firstNameError, setFirstNameError] = useState(false);
     const [lastNameError, setLastNameError] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         fetchAuthors();
@@ -80,6 +84,14 @@ export default function AuthorListPage() {
         }
     };
 
+    // Пагинация
+    const totalPages = Math.ceil(authors.length / ITEMS_PER_PAGE);
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    const visibleAuthors = authors.slice(
+        startIndex,
+        startIndex + ITEMS_PER_PAGE
+    );
+
     return (
         <Container maxWidth="md" sx={{ mt: 4 }}>
             <Typography variant="h4" gutterBottom>
@@ -115,7 +127,7 @@ export default function AuthorListPage() {
             )}
 
             <List>
-                {authors.map((author) => (
+                {visibleAuthors.map((author) => (
                     <ListItem key={author.authorId} divider>
                         <ListItemText
                             primary={`${author.firstName} ${author.lastName}`}
@@ -146,6 +158,13 @@ export default function AuthorListPage() {
                     </ListItem>
                 ))}
             </List>
+
+            <Pagination
+                count={totalPages}
+                page={page}
+                onChange={(e, value) => setPage(value)}
+                sx={{ mt: 2 }}
+            />
         </Container>
     );
 }
